@@ -1,0 +1,7 @@
+auth/dist
+auth/.env
+auth/node_modules
+
+backend/dist
+backend/.env
+backend/node_modules
