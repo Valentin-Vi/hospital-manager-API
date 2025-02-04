@@ -1,0 +1,67 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model user {
+    userId       Int      @id @unique @default(autoincrement())
+    email        String   @unique
+    password     String?
+    name         String?
+    lastname     String?
+    refreshToken String?
+    type         userType @default(CLIENT)
+    client       client?
+    doctor       doctor?
+    desk         desk?
+
+    @@map("users")
+}
+
+model client {
+    clientId Int     @id @unique @default(autoincrement())
+    userId   Int     @unique
+    user     user    @relation(fields: [userId], references: [userId])
+    visits   visit[]
+
+    @@map("clients")
+}
+
+model doctor {
+    doctorId  Int     @id @unique @default(autoincrement())
+    userId    Int     @unique
+    user      user    @relation(fields: [userId], references: [userId])
+    specialty String
+    visits    visit[]
+
+    @@map("doctors")
+}
+
+model desk {
+    deskId Int  @id @unique @default(autoincrement())
+    userId Int  @unique
+    user   user @relation(fields: [userId], references: [userId])
+}
+
+model visit {
+    id        Int       @id @unique @default(autoincrement())
+    cratedAt  DateTime  @default(now())
+    updatedAt DateTime?
+    visitDate DateTime
+    clientId  Int
+    doctorId  Int
+    client    client    @relation(fields: [clientId], references: [clientId])
+    doctor    doctor    @relation(fields: [doctorId], references: [doctorId])
+
+    @@map("visits")
+}
+
+enum userType {
+    CLIENT
+    DOCTOR
+    DESK
+}

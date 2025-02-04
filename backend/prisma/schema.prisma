@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  userId       Int      @id @unique @default(autoincrement())
+  email        String   @unique
+  password     String?
+  name         String?
+  lastname     String?
+  refreshToken String?
+  type         userType @default(CLIENT)
+  client       client?
+  desk         desk?
+  doctor       doctor?
+
+  @@map("users")
+}
+
+model client {
+  clientId Int     @id @unique @default(autoincrement())
+  userId   Int     @unique
+  user     user    @relation(fields: [userId], references: [userId])
+  visits   visit[]
+
+  @@map("clients")
+}
+
+model doctor {
+  doctorId  Int     @id @unique @default(autoincrement())
+  userId    Int     @unique
+  specialty String
+  user      user    @relation(fields: [userId], references: [userId])
+  visits    visit[]
+
+  @@map("doctors")
+}
+
+model visit {
+  visitId   Int       @id @unique @default(autoincrement())
+  cratedAt  DateTime  @default(now())
+  updatedAt DateTime?
+  visitDate DateTime
+  clientId  Int
+  doctorId  Int
+  client    client    @relation(fields: [clientId], references: [clientId])
+  doctor    doctor    @relation(fields: [doctorId], references: [doctorId])
+
+  @@map("visits")
+}
+
+model desk {
+  deskId Int  @id @unique @default(autoincrement())
+  userId Int  @unique
+  user   user @relation(fields: [userId], references: [userId])
+
+  @@map("desks")
+}
+
+enum userType {
+  CLIENT
+  DOCTOR
+  DESK
+}
+
+model med {
+  medId       Int    @id @unique @default(autoincrement())
+  name        String
+  category    String
+  stock       stock?
+  description String
+
+  @@map("medications")
+}
+
+model item {
+  itemId      Int    @id @unique @default(autoincrement())
+  name        String
+  category    String
+  stock       stock?
+  description String
+
+  @@map("items")
+}
+
+model stock {
+  stockId   Int            @id @unique @default(autoincrement())
+  itemId    Int            @unique
+  item      item           @relation(fields: [itemId], references: [itemId])
+  medId     Int            @unique
+  med       med            @relation(fields: [medId], references: [medId])
+  quantity  Int
+  cost      Decimal
+  updatedAt DateTime
+  history   stockHistory[]
+
+  @@map("stock")
+}
+
+model stockHistory {
+  histId  Int      @id @unique @default(autoincrement())
+  stockId Int
+  stock   stock    @relation(fields: [stockId], references: [stockId])
+  date    DateTime
+  units   Int
+
+  @@map("stock_history")
+}
