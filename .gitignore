@@ -1,3 +1,5 @@
+node_modules
+
 auth/dist
 auth/.env
 auth/node_modules
